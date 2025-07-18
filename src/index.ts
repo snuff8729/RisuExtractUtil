@@ -87,22 +87,23 @@ async function toJson(folderPath: string) {
     const fileNameList = readdirSync(folderPath)
 
     for (const fileName of fileNameList) {
+        console.log(`-- ${fileName} --`)
         const extension = path.extname(fileName).toLowerCase();
         const fpath = path.join(folderPath, fileName)
 
         switch (extension) {
             case '.png':
             case '.charx':
-                charXToJson(fpath)
+                await charXToJson(fpath)
                 break
             
             case '.risupreset':
-            case '.risupreset':
-                risupToJson(fpath)
+            case '.risup':
+                await risupToJson(fpath)
                 break
 
             case '.risum':
-                risumToJson(fpath)
+                await risumToJson(fpath)
                 break
         }
     }
