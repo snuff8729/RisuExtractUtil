@@ -6,12 +6,12 @@ import { readPreset } from './preset';
 import { CharXReader, readPng } from './charx';
 
 
-export async function risumToJson(filePath: string) {
+export async function risumToJson(filePath: string, targetFolderPath: string) {
     let data = readFileSync(filePath)
     let risuModule = await readModule(data)
 
     const targetJsonFilePath = path.format({
-        dir: path.dirname(path.dirname(__filename)),
+        dir: path.join(path.dirname(path.dirname(__filename)), targetFolderPath),
         name: path.basename(filePath, path.extname(filePath)),
         ext: '.json',
     })
@@ -20,12 +20,12 @@ export async function risumToJson(filePath: string) {
 }
 
 
-export async function risupToJson(filePath: string) {
+export async function risupToJson(filePath: string, targetFolderPath: string) {
     let data = readFileSync(filePath)
     let risuPreset = await readPreset({name: path.basename(filePath), data: data})
 
     const targetJsonFilePath = path.format({
-        dir: path.dirname(path.dirname(__filename)),
+        dir: path.join(path.dirname(path.dirname(__filename)), targetFolderPath),
         name: path.basename(filePath, path.extname(filePath)),
         ext: '.json',
     })
@@ -34,11 +34,11 @@ export async function risupToJson(filePath: string) {
 }
 
 
-export async function charXToJson(filePath: string) {
+export async function charXToJson(filePath: string, targetFolderPath: string) {
     let data = readFileSync(filePath)
 
     const targetJsonFilePath = path.format({
-        dir: path.dirname(path.dirname(__filename)),
+        dir: path.join(path.dirname(path.dirname(__filename)), targetFolderPath),
         name: path.basename(filePath, path.extname(filePath)),
         ext: '.json',
     });
@@ -69,7 +69,7 @@ export async function charXToJson(filePath: string) {
     writeFileSync(targetJsonFilePath, JSON.stringify(charaData, null, 4))
 }
 
-async function toJson(folderPath: string) {
+async function toJson(folderPath: string, targetFolderPath: string = "Converted") {
     const fileNameList = readdirSync(folderPath)
 
     for (const fileName of fileNameList) {
@@ -80,16 +80,16 @@ async function toJson(folderPath: string) {
         switch (extension) {
             case '.png':
             case '.charx':
-                await charXToJson(fpath)
+                await charXToJson(fpath, targetFolderPath)
                 break
             
             case '.risupreset':
             case '.risup':
-                await risupToJson(fpath)
+                await risupToJson(fpath, targetFolderPath)
                 break
 
             case '.risum':
-                await risumToJson(fpath)
+                await risumToJson(fpath, targetFolderPath)
                 break
         }
     }
@@ -108,13 +108,11 @@ async function beautifyMarkdownText(original: string): Promise<string> {
     return text;
 }
 
-async function promptTemplateToMarkdown(filePath: string) {
+async function promptTemplateToMarkdown(filePath: string, targetFolderPath: string = "Converted") {
     let rawData = readFileSync(filePath, 'utf8')
     const jsonData = JSON.parse(rawData);
 
     const promptTemplateData = jsonData.promptTemplate;
-
-    let fullMarkdownString: string = ""
 
     const markdownEntries = await Promise.all(promptTemplateData.map(async (
         item: { name: string; role: string; type: string; type2: string; text: string; }
@@ -132,6 +130,7 @@ async function promptTemplateToMarkdown(filePath: string) {
     }));
 
     const parsedPath = path.parse(filePath);
+    parsedPath.dir = path.join(path.dirname(path.dirname(__filename)), targetFolderPath);
     parsedPath.ext = '.md'
     parsedPath.base = '';
 
@@ -143,6 +142,6 @@ async function promptTemplateToMarkdown(filePath: string) {
 }
 
 
-// toJson("Target")
-promptTemplateToMarkdown("소악마 프롬프트 v6 [Gem2.5]_preset.json")
+// toJson("Source Files")
+promptTemplateToMarkdown("Converted/소악마 프롬프트 v6 [Gem2.5]_preset.json")
 
