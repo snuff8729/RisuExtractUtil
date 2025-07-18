@@ -69,20 +69,6 @@ export async function charXToJson(filePath: string) {
     writeFileSync(targetJsonFilePath, JSON.stringify(charaData, null, 4))
 }
 
-async function beautifyMarkdownText(original: string) {
-    let text = original
-    text = text.replace(/</g, '\\<').replace(/>/g, '\\>')
-    text = text.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
-    text = text.replace(/\n{2,}/g, '\n')
-    text = text.replace(/\:\:/g, '\\:\\:')
-    text = text.replace(/\-\-\-/g, '\\-\\-\\-')
-    text = text.replace(/\`\`\`/g, '\\`\\`\\`')
-    text = text.replace(/\n#/g, '\n\\#')
-    text = text.replace(/^#/g, '\\#')
-    const filePath = "temp.md"
-    writeFileSync(filePath, text, 'utf-8')
-}
-
 async function toJson(folderPath: string) {
     const fileNameList = readdirSync(folderPath)
 
@@ -109,7 +95,54 @@ async function toJson(folderPath: string) {
     }
 }
 
-// let t = ""
-// beautifyMarkdownText(t)
+async function beautifyMarkdownText(original: string): Promise<string> {
+    let text = original
+    text = text.replace(/</g, '\\<').replace(/>/g, '\\>')
+    text = text.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
+    text = text.replace(/\n{2,}/g, '\n')
+    text = text.replace(/\:\:/g, '\\:\\:')
+    text = text.replace(/\-\-\-/g, '\\-\\-\\-')
+    text = text.replace(/\`\`\`/g, '\\`\\`\\`')
+    text = text.replace(/\n#/g, '\n\\#')
+    text = text.replace(/^#/g, '\\#')
+    return text;
+}
 
-toJson("Target")
+async function promptTemplateToMarkdown(filePath: string) {
+    let rawData = readFileSync(filePath, 'utf8')
+    const jsonData = JSON.parse(rawData);
+
+    const promptTemplateData = jsonData.promptTemplate;
+
+    let fullMarkdownString: string = ""
+
+    const markdownEntries = await Promise.all(promptTemplateData.map(async (
+        item: { name: string; role: string; type: string; type2: string; text: string; }
+    ) => {
+        const { name, role, type, type2, text } = item;
+        const header = `# ${name} ${role} ${type} ${type2}`;
+        let markdownString = `${header}`;
+
+        if (text !== undefined) {
+            const beautifiedText = await beautifyMarkdownText(text);
+            markdownString += `\n\n${beautifiedText}`;
+        }
+
+        return markdownString;
+    }));
+
+    const parsedPath = path.parse(filePath);
+    parsedPath.ext = '.md'
+    parsedPath.base = '';
+
+    writeFileSync(
+        path.format(parsedPath), 
+        markdownEntries.join('\n\n---\n\n'), 
+        'utf-8'
+    )
+}
+
+
+// toJson("Target")
+promptTemplateToMarkdown("소악마 프롬프트 v6 [Gem2.5]_preset.json")
+
