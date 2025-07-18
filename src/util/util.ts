@@ -27,6 +27,28 @@ export async function decryptBuffer(data:Uint8Array, keys:string) {
   return decrypted;
 }
 
+export function blobToUint8Array(data:Blob){
+    return new Promise<Uint8Array>((resolve,reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+            if(reader.result instanceof ArrayBuffer){
+                resolve(new Uint8Array(reader.result))
+            }
+            else{
+                reject(new Error('reader.result is not ArrayBuffer'))
+            }
+        }
+        reader.onerror = () => {
+            reject(reader.error)
+        }
+        reader.readAsArrayBuffer(data)
+    })
+}
+
+export async function hasher(data:Uint8Array){
+    return Buffer.from(await crypto.subtle.digest("SHA-256", data)).toString('hex');
+}
+
 
 // export async function decryptBuffer(data:Uint8Array, keys:string){
 //     // hash the key to get a fixed length key value

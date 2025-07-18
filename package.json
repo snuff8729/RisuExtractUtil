@@ -17,6 +17,7 @@
     "vite-plugin-wasm": "^3.4.1"
   },
   "dependencies": {
+    "crc": "^4.3.2",
     "fflate": "^0.8.2",
     "msgpackr": "^1.11.2",
     "rfdc": "^1.4.1",
