@@ -108,7 +108,7 @@ async function beautifyMarkdownText(original: string): Promise<string> {
     return text;
 }
 
-async function promptTemplateToMarkdown(filePath: string, targetFolderPath: string = "Converted") {
+async function promptTemplateToMarkdown(filePath: string, targetFolderPath: string = "Extracted") {
     let rawData = readFileSync(filePath, 'utf8')
     const jsonData = JSON.parse(rawData);
 
@@ -143,5 +143,5 @@ async function promptTemplateToMarkdown(filePath: string, targetFolderPath: stri
 
 
 // toJson("Source Files")
-promptTemplateToMarkdown("Converted/소악마 프롬프트 v6 [Gem2.5]_preset.json")
+promptTemplateToMarkdown("Converted/🍉서리 프롬프트 for Gemini Pro 2.5 v10-7.json")
 
