@@ -83,19 +83,32 @@ async function beautifyMarkdownText(original: string) {
     writeFileSync(filePath, text, 'utf-8')
 }
 
-async function toJson(index: number) {
-    const folderPath = "Target"
+async function toJson(folderPath: string) {
     const fileNameList = readdirSync(folderPath)
-    const fileName = fileNameList[index]
 
-    const fpath = path.join(folderPath, fileName)
-    // risupToJson(fpath)
-    // risumToJson(fpath)
-    charXToJson(fpath)
+    for (const fileName of fileNameList) {
+        const extension = path.extname(fileName).toLowerCase();
+        const fpath = path.join(folderPath, fileName)
+
+        switch (extension) {
+            case '.png':
+            case '.charx':
+                charXToJson(fpath)
+                break
+            
+            case '.risupreset':
+            case '.risupreset':
+                risupToJson(fpath)
+                break
+
+            case '.risum':
+                risumToJson(fpath)
+                break
+        }
+    }
 }
 
-let t = ""
-beautifyMarkdownText(t)
+// let t = ""
+// beautifyMarkdownText(t)
 
-// let index = 0
-// toJson(index)
+toJson("Target")
